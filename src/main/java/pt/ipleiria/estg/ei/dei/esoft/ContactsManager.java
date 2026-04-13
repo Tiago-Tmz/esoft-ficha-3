@@ -36,18 +36,29 @@ public class ContactsManager {
     public List<Contact> search(String term, String... labels  ) {
 
         List<Contact> result = new LinkedList<>();
+        // CORREÇÃO: Converte o termo para minúsculas para a pesquisa ser case-insensitive
+        String lowerTerm = term.toLowerCase();
+
         for (var contact : contacts) {
-            if (contact.getFirstName().contains(term) || contact.getLastName().contains(term)) {
+            // CORREÇÃO: Verifica se não é nulo antes de converter para minúsculas e procurar
+            if ((contact.getFirstName() != null && contact.getFirstName().toLowerCase().contains(lowerTerm)) ||
+                    (contact.getLastName() != null && contact.getLastName().toLowerCase().contains(lowerTerm)) ||
+                    (contact.getPhone() != null && contact.getPhone().toLowerCase().contains(lowerTerm)) ||
+                    (contact.getEmail() != null && contact.getEmail().toLowerCase().contains(lowerTerm))) {
+
                 result.add(contact);
             }
         }
+
         if (labels.length == 0) return result;
+
         List<Contact> filteredResult = new LinkedList<>();
         for (var label : labels) {
             var contactsLabel = this.labels.get(label);
             if (contactsLabel == null) continue;
             for (var contact : contactsLabel) {
-                if (result.contains(contact)) {
+                // CORREÇÃO: Garante que não adiciona duplicados na lista filtrada caso tenha múltiplas labels
+                if (result.contains(contact) && !filteredResult.contains(contact)) {
                     filteredResult.add(contact);
                 }
             }
@@ -57,8 +68,8 @@ public class ContactsManager {
 
     public void addContact(Contact contact, String... labels) {
         java.util.function.Predicate<Contact> duplicate = c ->
-                Objects.equals(c.getPhone(), contact.getPhone()) ||
-                        Objects.equals(c.getEmail(), contact.getEmail());
+                (c.getPhone() != null && c.getPhone().equals(contact.getPhone())) ||
+                        (c.getEmail() != null && c.getEmail().equals(contact.getEmail()));
 
         if (contacts.stream().noneMatch(duplicate)) {
             contacts.add(contact);
@@ -72,7 +83,6 @@ public class ContactsManager {
             }
             var contactsLabel = this.labels.get(label);
 
-            // Adiciona à label se ainda não estiver lá
             if (contactsLabel.stream().noneMatch(duplicate)) {
                 contactsLabel.add(contact);
             }
