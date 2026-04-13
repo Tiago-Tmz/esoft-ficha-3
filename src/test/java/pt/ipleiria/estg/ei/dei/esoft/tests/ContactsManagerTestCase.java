@@ -150,4 +150,37 @@ public class ContactsManagerTestCase {
         assertTrue(emptyResult.isEmpty(), "Não existe nenhum João na etiqueta família.");
     }
 
+    @Test
+    public void testContactsManagerInitialization() {
+        ContactsManager newCm = new ContactsManager();
+        assertTrue(newCm.isEmpty(), "A lista de contactos deve começar completamente vazia.");
+        assertTrue(newCm.getLabels().isEmpty(), "O gestor de contactos deve iniciar sem nenhuma etiqueta.");
+    }
+
+    @Test
+    public void testDontAllowDuplicatedEmail() {
+        var contact1 = new Contact("Ana", "Silva", "910000000", "ana@mail.com");
+        var contact2 = new Contact("Ana", "Gomes", "920000000", "ana@mail.com"); // Email igual, telefone diferente
+
+        cm.addContact(contact1);
+        cm.addContact(contact2);
+
+        assertEquals(1, cm.size(), "O sistema permitiu adicionar um contacto com um e-mail já existente!");
+    }
+
+    @Test
+    public void testLabelsUpdatedAfterRemoval() {
+        var contact = new Contact("Pedro", "911222333");
+        cm.addContact(contact, "colegas");
+
+        // Verifica se entrou na etiqueta
+        assertEquals(1, cm.getContacts("colegas").size());
+
+        // Remove o contacto
+        cm.removeContact(contact);
+
+        // Verifica se SAIU da etiqueta
+        assertTrue(cm.getContacts("colegas").isEmpty(), "O contacto foi removido da lista geral, mas ficou 'esquecido' dentro da etiqueta!");
+    }
+
 }
