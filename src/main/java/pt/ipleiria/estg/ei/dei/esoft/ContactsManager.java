@@ -3,6 +3,7 @@ package pt.ipleiria.estg.ei.dei.esoft;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class ContactsManager {
     private List<Contact> contacts;
@@ -55,14 +56,11 @@ public class ContactsManager {
     }
 
     public void addContact(Contact contact, String... labels) {
-        for (Contact c : this.contacts) {
-            if (c.getPhone().equals(contact.getPhone())) {
-                System.out.println("Erro: Já existe um contacto com o número " + contact.getPhone());
-                return;
-            }
-        }
+        java.util.function.Predicate<Contact> duplicate = c ->
+                Objects.equals(c.getPhone(), contact.getPhone()) ||
+                        Objects.equals(c.getEmail(), contact.getEmail());
 
-        if (!contacts.contains(contact)) {
+        if (contacts.stream().noneMatch(duplicate)) {
             contacts.add(contact);
         }
 
@@ -74,7 +72,8 @@ public class ContactsManager {
             }
             var contactsLabel = this.labels.get(label);
 
-            if (!contactsLabel.contains(contact)) {
+            // Adiciona à label se ainda não estiver lá
+            if (contactsLabel.stream().noneMatch(duplicate)) {
                 contactsLabel.add(contact);
             }
         }
@@ -89,6 +88,9 @@ public class ContactsManager {
 
     public int size() {
         return contacts.size();
+    }
+    public boolean isEmpty() {
+        return contacts.isEmpty();
     }
 
 }
