@@ -17,26 +17,67 @@ public class ContactsManager {
         return new LinkedList<>(labels.keySet());
 
     }
-    public List<Contact> getContacts(String labels) {
-        return this.labels.get(labels);
-    }
-
-    public List<Contact> search(String term, String labels  ) {
+    public List<Contact> getContacts(String... labels) {
+        if (labels.length == 0) return new LinkedList<>(contacts);
         List<Contact> result = new LinkedList<>();
-        for (Contact contact : this.labels.get(labels)) {
-            if (contact.getFirstName().contains(term) || contact.getLastName().contains(term) || contact.getPhone().contains(term) || contact.getEmail().contains(term)) {
-                result.add(contact);
+        for (var label : labels) {
+            var contactsLabel = this.labels.get(label);
+            if (contactsLabel == null) continue;
+            for (var contact : contactsLabel) {
+                if (!result.contains(contact)) {
+                    result.add(contact);
+                }
             }
         }
         return result;
     }
 
-    public void addContact(Contact contact, String labels) {
-        this.contacts.add(contact);
-        if (!this.labels.containsKey(labels)) {
-            this.labels.put(labels, new LinkedList<>());
+    public List<Contact> search(String term, String... labels  ) {
+
+        List<Contact> result = new LinkedList<>();
+        for (var contact : contacts) {
+            if (contact.getFirstName().contains(term) || contact.getLastName().contains(term)) {
+                result.add(contact);
+            }
         }
-        this.labels.get(labels).add(contact);
+        if (labels.length == 0) return result;
+        List<Contact> filteredResult = new LinkedList<>();
+        for (var label : labels) {
+            var contactsLabel = this.labels.get(label);
+            if (contactsLabel == null) continue;
+            for (var contact : contactsLabel) {
+                if (result.contains(contact)) {
+                    filteredResult.add(contact);
+                }
+            }
+        }
+        return filteredResult;
+    }
+
+    public void addContact(Contact contact, String... labels) {
+        for (Contact c : this.contacts) {
+            if (c.getPhone().equals(contact.getPhone())) {
+                System.out.println("Erro: Já existe um contacto com o número " + contact.getPhone());
+                return;
+            }
+        }
+
+        if (!contacts.contains(contact)) {
+            contacts.add(contact);
+        }
+
+        if (labels.length == 0) return;
+
+        for (var label : labels) {
+            if (!this.labels.containsKey(label)) {
+                this.labels.put(label, new LinkedList<>());
+            }
+            var contactsLabel = this.labels.get(label);
+
+            if (!contactsLabel.contains(contact)) {
+                contactsLabel.add(contact);
+            }
+        }
     }
 
     public void removeContact(Contact contact){
