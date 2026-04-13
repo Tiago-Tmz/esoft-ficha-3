@@ -3,6 +3,8 @@ import org.junit.jupiter.api.*;
 import pt.ipleiria.estg.ei.dei.esoft.Contact;
 import pt.ipleiria.estg.ei.dei.esoft.ContactsManager;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ContactsManagerTestCase {
@@ -57,6 +59,95 @@ public class ContactsManagerTestCase {
         assertEquals(1, cm.size());
         cm.removeContact(bar);
         assertFalse(cm.isEmpty(), "<give a meaningful message>");
+    }
+
+    @Test
+    public void testListLabels() {
+        // 6.1 Lista vazia
+        assertTrue(cm.getLabels().isEmpty(), "Sem contactos, a lista de etiquetas devia estar vazia.");
+
+        // 6.2 Vários contactos com a mesma etiqueta
+        Contact c1 = new Contact("Ana", "910000001");
+        Contact c2 = new Contact("Rui", "910000002");
+        cm.addContact(c1, "amigos");
+        cm.addContact(c2, "amigos");
+
+        assertEquals(1, cm.getLabels().size(), "Deveria haver apenas 1 etiqueta única.");
+        assertEquals(2, cm.getContacts("amigos").size(), "Deveriam existir 2 contactos na etiqueta 'amigos'.");
+
+        // 6.3 Um contacto com várias etiquetas
+        Contact c3 = new Contact("Rita", "910000003");
+        cm.addContact(c3, "trabalho", "familia");
+        assertTrue(cm.getLabels().contains("trabalho") && cm.getLabels().contains("familia"));
+    }
+
+    // ==========================================
+    // 7. FILTRAR POR ETIQUETA
+    // ==========================================
+
+    @Test
+    public void testFilterByLabel() {
+        Contact c1 = new Contact("Ana", "911111111");
+        Contact c2 = new Contact("Rui", "922222222");
+        cm.addContact(c1, "amigos");
+        cm.addContact(c2, "familia");
+
+        // 7.1 Uma etiqueta
+        List<Contact> amigos = cm.getContacts("amigos");
+        assertEquals(1, amigos.size());
+        assertTrue(amigos.contains(c1));
+
+        // 7.2 Múltiplas etiquetas
+        List<Contact> ambos = cm.getContacts("amigos", "familia");
+        assertEquals(2, ambos.size(), "Deveria devolver os contactos das duas etiquetas.");
+
+        // 7.3 Lista vazia se etiqueta não existe
+        List<Contact> vazia = cm.getContacts("inexistente");
+        assertTrue(vazia.isEmpty(), "Deveria devolver lista vazia para etiqueta inexistente.");
+    }
+
+    // ==========================================
+    // 8. PESQUISA BÁSICA
+    // ==========================================
+
+    @Test
+    public void testBasicSearch() {
+        Contact c1 = new Contact("Joao", "Silva", "911111111", "joao@mail.com");
+        cm.addContact(c1);
+
+        // 8.1 Termo exato
+        assertEquals(1, cm.search("Joao").size(), "Falhou a procurar termo exato.");
+        assertEquals(1, cm.search("911111111").size(), "Falhou a procurar por telefone.");
+
+        // 8.2 Termo parcial
+        assertEquals(1, cm.search("joao@").size(), "Falhou a procurar termo parcial.");
+        assertEquals(1, cm.search("Sil").size(), "Falhou a procurar termo parcial.");
+
+        // 8.3 Insensível a maiúsculas/minúsculas
+        assertEquals(1, cm.search("JOAO").size(), "Pesquisa deve ignorar maiúsculas/minúsculas.");
+        assertEquals(1, cm.search("silva").size(), "Pesquisa deve ignorar maiúsculas/minúsculas.");
+    }
+
+    // ==========================================
+    // 9. PESQUISA COM ETIQUETAS
+    // ==========================================
+
+    @Test
+    public void testSearchWithLabels() {
+        Contact c1 = new Contact("Joao", "Silva", "911111111");
+        Contact c2 = new Contact("Joao", "Santos", "922222222");
+
+        cm.addContact(c1, "amigos");
+        cm.addContact(c2, "trabalho");
+
+        // 9.1 Procurar apenas dentro da etiqueta
+        List<Contact> result = cm.search("Joao", "amigos");
+        assertEquals(1, result.size());
+        assertEquals("Silva", result.get(0).getLastName(), "Só devia encontrar o João Silva (amigos).");
+
+        // 9.2 Lista vazia se não houver contactos a cumprir o critério
+        List<Contact> emptyResult = cm.search("Joao", "familia");
+        assertTrue(emptyResult.isEmpty(), "Não existe nenhum João na etiqueta família.");
     }
 
 }
