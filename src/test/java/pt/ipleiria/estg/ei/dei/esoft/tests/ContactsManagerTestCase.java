@@ -29,4 +29,34 @@ public class ContactsManagerTestCase {
         assertEquals(1, cm.size(), "Duplicated contacts!");
     }
 
+    @Test
+    public void testRemoveContact() {
+        var contact = new Contact("foo", "931 456 907");
+        cm.addContact(contact);
+        assertEquals(1, cm.size());
+        cm.removeContact(contact);
+        // TODO implement method cm.isEmpty() too!
+        // At class ContactsManager:
+        // public boolean isEmpty() { return contacts.isEmpty(); }
+        assertTrue(cm.isEmpty(), "<give a meaningful message>");
+    }
+    @Test
+    public void testTryRemoveNonexistentContact() {
+        var foobar = new Contact("Foo", "Bar", "928 032 179", "foo@bar.test");
+        var dummy = new Contact("Mr.", "Dummy","964 475 145", "mr@dummy.test");
+        cm.addContact(foobar);
+        assertEquals(1, cm.size());
+        cm.removeContact(dummy);
+        assertFalse(cm.isEmpty(), "<give a meaningful message>");
+    }
+    @Test
+    public void testDontRemoveUnlessIsSameContact() {
+        var foo = new Contact("foo", "91X ABC DEF");
+        var bar = new Contact("bar", "91X ABC DEF");
+        cm.addContact(foo);
+        assertEquals(1, cm.size());
+        cm.removeContact(bar);
+        assertFalse(cm.isEmpty(), "<give a meaningful message>");
+    }
+
 }

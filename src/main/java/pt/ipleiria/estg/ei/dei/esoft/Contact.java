@@ -35,18 +35,23 @@ public class Contact {
         this.birthday = birthday;
     }
     @Override
-    public boolean equals(Object o) {
+    public boolean equals (Object o) {
         if (this == o) return true;
         if (!(o instanceof Contact)) return false;
-        Contact contact = (Contact) o;
-        // A ficha diz que são duplicados se tiverem o mesmo telefone OU o mesmo email
-        return Objects.equals(this.phone, contact.phone) ||
-                (this.email != null && Objects.equals(this.email, contact.email));
+        var another = (Contact) o;
+
+        if (!Objects.equals(this.firstName, another.firstName)) return false;
+        if (!Objects.equals(this.lastName, another.lastName)) return false;
+        if (!Objects.equals(this.birthday, another.birthday)) return false;
+        if (!Objects.equals(this.phone, another.phone)) return false;
+        if (!Objects.equals(this.email, another.email)) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(phone, email);
+        return Objects.hash(firstName, lastName, birthday, phone, email);
     }
 
     public String getFirstName() {
